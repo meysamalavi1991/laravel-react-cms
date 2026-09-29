@@ -1,0 +1,136 @@
+version: "3.8"
+
+services:
+
+  #frontend:
+  #build:
+  #context: ./app-frontend
+  #ports:
+  #- "80:80"
+  #- "3000:3000" # HOST:CONTAINER
+  #volumes:
+  #- ./app-frontend/dist:/app/dist:consistent
+  #- ./app-frontend/public:/app/public:consistent
+  #- ./app-frontend/src:/app/src:consistent
+  #- ./app-frontend/package.json:/app/package.json
+  #- ./app-frontend/package-lock.json:/app/package-lock.json
+  #- ./app-frontend/webpack.config.js:/app/webpack.config.js
+  #- ./app-frontend/node_modules
+  #environment:
+  #NODE_ENV: development
+  #CHOKIDAR_USEPOLLING: "true"
+  #CHOKIDAR_INTERVAL: 2000
+  #tty: true
+  #stdin_open: true
+  #command:
+  #- /bin/sh
+  #- -c
+  #- npm run start
+  #- npm run dev:watch
+  #- npm run watch
+  #- npm run dev
+  #networks:
+  #- app-network
+
+  backend:
+    image: "${APP_NAME}_backend"
+    build:
+      args:
+        user: "meysam"
+        uid: "1000"
+      context: ./app-backend/
+    restart: unless-stopped
+    environment:
+      DB_HOST: "mysql-db"
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS}
+      COMPOSER_MEMORY_LIMIT: "-1" # unlimited
+    working_dir: /var/www/html
+    volumes:
+      - ./app-backend:/var/www/html
+      - ./.docker/php/php.ini:/usr/local/etc/php/php.ini # development
+      #- ./.docker/php/php.ini-production:/usr/local/etc/php/php.ini-production
+      #- ./.docker/php/php.ini-production:/usr/local/etc/php/php.ini-production
+      #command:
+      #- /bin/sh
+      #- -c
+      #- php artisan serve
+    depends_on:
+      - meilisearch
+      - redis
+    ports:
+      - "8000:80"
+    networks:
+      - app-network
+
+  appdb:
+    image: mysql:8.0.26
+    container_name: "mysql-db"
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      LOWER_CASE_TABLE_NAMES: 2
+    volumes:
+      - ./.docker/mysql/init-db:/docker-entrypoint-initdb.d
+      - ./.docker/mysql/db-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+    links:
+      - meilisearch
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: appdb
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      UPLOAD_LIMIT: "512M"
+    depends_on:
+      - appdb
+    ports:
+      - "8443:80"
+    networks:
+      - app-network
+
+  meilisearch:
+    image: 'getmeili/meilisearch:latest'
+    ports:
+      - '${FORWARD_MEILISEARCH_PORT:-7700}:7700'
+    volumes:
+      - './app-backend/storage/app/meilisearch:/meili_data'
+    networks:
+      - app-network
+    healthcheck:
+      test: [ 'CMD', 'wget', '--no-verbose', '--spider', 'http://localhost:7700/health' ]
+      retries: 3
+      timeout: 5s
+  redis:
+    image: 'redis:alpine'
+    ports:
+      - '${FORWARD_REDIS_PORT:-6379}:6379'
+    volumes:
+      - './app-backend/storage/app/redis:/meili_data'
+    networks:
+      - app-network
+    healthcheck:
+      test: [ 'CMD', 'wget', '--no-verbose', '--spider', 'http://localhost:7700/health' ]
+      retries: 3
+      timeout: 5s
+networks:
+  app-network:
+    driver: bridge
+volumes:
+  mysql:
+    driver: local
+  redis:
+    driver: local
+  meilisearch:
+    driver: local

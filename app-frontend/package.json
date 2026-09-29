@@ -1,0 +1,58 @@
+{
+  "name": "laravel-react-cms",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.4.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^14.0.0",
+    "axios": "^1.4.0",
+    "bootstrap": "^5.2.3",
+    "caniuse-lite": "^1.0.30001486",
+    "devextreme": "^22.2.6",
+    "devextreme-react": "^22.2.6",
+    "font-awesome": "^4.7.0",
+    "momnet": "^2.29.1",
+    "npm": "^9.6.7",
+    "particles-bg": "^2.5.5",
+    "react": "^18.2.0",
+    "react-avatar-edit": "^1.2.0",
+    "react-bootstrap": "^2.7.4",
+    "react-datepicker": "^4.11.0",
+    "react-dom": "^18.2.0",
+    "react-fileupload-progress": "^0.5.0",
+    "react-icons": "^4.8.0",
+    "react-password-strength-bar": "^0.4.1",
+    "react-redux": "^8.0.5",
+    "react-router": "^6.11.1",
+    "react-router-dom": "^6.11.1",
+    "react-scripts": "^5.0.1",
+    "react-select": "^5.7.3",
+    "sweetalert2": "^11.7.5",
+    "web-vitals": "^3.3.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
